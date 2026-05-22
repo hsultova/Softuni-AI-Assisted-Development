@@ -4,14 +4,9 @@ using TodoApp.Models;
 
 namespace TodoApp.Controllers
 {
-    public class TodosController : Controller
+    public class TodosController(AppDbContext context) : Controller
     {
-        private readonly AppDbContext _context;
-
-        public TodosController(AppDbContext context)
-        {
-            _context = context;
-        }
+        private readonly AppDbContext _context = context;
 
         // GET: Todos/Index
         public async Task<IActionResult> Index()
