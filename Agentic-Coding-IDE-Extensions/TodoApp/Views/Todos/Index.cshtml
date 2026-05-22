@@ -1,0 +1,54 @@
+@model IEnumerable<TodoApp.Models.Todo>
+
+@{
+    ViewData["Title"] = "My Todos";
+}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>My Todos</h1>
+        <a asp-action="Create" class="btn btn-primary">Add New Todo</a>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="row">
+            @foreach (var todo in Model)
+            {
+                <div class="col-md-6 mb-3">
+                    <div class="card @(todo.IsDone ? "border-success" : "")">
+                        <div class="card-body">
+                            <h5 class="card-title @(todo.IsDone ? "text-muted text-decoration-line-through" : "")">
+                                @todo.Title
+                            </h5>
+                            @if (!string.IsNullOrEmpty(todo.Description))
+                            {
+                                <p class="card-text text-muted">@todo.Description</p>
+                            }
+                            <div class="small text-secondary mb-3">
+                                <div>Created: @todo.CreatedAt.ToString("MMM dd, yyyy")</div>
+                                @if (todo.DueDate.HasValue)
+                                {
+                                    <div>Due: @todo.DueDate.Value.ToString("MMM dd, yyyy")</div>
+                                }
+                                <div>Status: <span class="badge @(todo.IsDone ? "bg-success" : "bg-warning")">
+                                    @(todo.IsDone ? "Completed" : "Pending")
+                                </span></div>
+                            </div>
+                            <div class="btn-group" role="group">
+                                <a asp-action="Edit" asp-route-id="@todo.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                                <a asp-action="Delete" asp-route-id="@todo.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info" role="alert">
+            <p>No todos yet. <a asp-action="Create">Create your first todo!</a></p>
+        </div>
+    }
+</div>
