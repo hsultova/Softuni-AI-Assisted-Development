@@ -29,3 +29,4 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+/* Priority-based card styling */.todo-card-high {  border-left: 4px solid #dc3545 !important;}`r.todo-card-medium {  border-left: 4px solid #fd7e14 !important;}`r.todo-card-low {  border-left: 4px solid #6c757d !important;}

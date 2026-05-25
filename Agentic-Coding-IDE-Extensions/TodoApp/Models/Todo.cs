@@ -8,6 +8,7 @@ namespace TodoApp.Models
         public bool IsDone { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? DueDate { get; set; }
+        public Priority Priority { get; set; } = Priority.Medium;
 
         public int? ProjectId { get; set; }
         public Project? Project { get; set; }

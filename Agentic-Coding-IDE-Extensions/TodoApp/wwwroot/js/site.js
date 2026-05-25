@@ -17,10 +17,15 @@ document.addEventListener('DOMContentLoaded', function () {
         const due = todo.dueDate ? new Date(todo.dueDate).toLocaleDateString(undefined, { month: 'short', day: '2-digit', year: 'numeric' }) : '';
         const created = new Date(todo.createdAt).toLocaleDateString(undefined, { month: 'short', day: '2-digit', year: 'numeric' });
         const projectName = todo.project?.name || '';
+    const priorityNames = ['Low', 'Medium', 'High'];
+    const priorityName = priorityNames[todo.priority] || 'Medium';
+    const priorityClassMap = { 0: 'todo-card-low', 1: 'todo-card-medium', 2: 'todo-card-high' };
+    const priorityClass = priorityClassMap[todo.priority] || 'todo-card-medium';
+    const priorityBadgeColor = todo.priority === 2 ? 'bg-danger' : todo.priority === 1 ? 'bg-warning' : 'bg-secondary';
 
         return `
 <div class="col-md-6 mb-3">
-    <div id="todo-card-${todo.id}" class="card ${isDone ? 'border-success' : ''}" data-isdone="${isDone}">
+    <div id="todo-card-${todo.id}" class="card ${isDone ? 'border-success' : ''} ${priorityClass}" data-isdone="${isDone}" data-priority="${todo.priority}">
         <div class="card-body">
             <h5 id="todo-title-${todo.id}" class="card-title ${isDone ? 'text-muted text-decoration-line-through' : ''}">${escapeHtml(todo.title || '')}</h5>
             ${todo.description ? `<p class="card-text text-muted">${escapeHtml(todo.description)}</p>` : ''}
@@ -29,6 +34,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 ${due ? `<div>Due: ${due}</div>` : ''}
                 ${projectName ? `<div>Project: <span class="badge bg-info text-dark">${escapeHtml(projectName)}</span></div>` : ''}
                 <div>Status: <span id="todo-status-${todo.id}" class="badge ${isDone ? 'bg-success' : 'bg-warning'}">${isDone ? 'Completed' : 'Pending'}</span></div>
+                           <div>Priority: <span id="todo-priority-${todo.id}" class="badge ${priorityBadgeColor}">${escapeHtml(priorityName)}</span></div>
             </div>
             <div class="btn-group" role="group">
                 <form action="/Todos/ToggleComplete" method="post" class="d-inline toggle-complete-form" data-id="${todo.id}">

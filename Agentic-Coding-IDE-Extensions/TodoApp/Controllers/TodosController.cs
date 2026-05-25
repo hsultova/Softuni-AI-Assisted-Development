@@ -33,6 +33,7 @@ namespace TodoApp.Controllers
                     title = todo.Title,
                     description = todo.Description,
                     isDone = todo.IsDone,
+                               priority = todo.Priority,
                     createdAt = todo.CreatedAt,
                     dueDate = todo.DueDate,
                     project = project is null ? null : new { id = project.Id, name = project.Name }
@@ -43,7 +44,7 @@ namespace TodoApp.Controllers
         // GET: Todos/Index
         public async Task<IActionResult> Index(int? projectId)
         {
-            var todosQuery = _context.Todos.Include(t => t.Project).OrderBy(t => t.CreatedAt).AsQueryable();
+            var todosQuery = _context.Todos.Include(t => t.Project).OrderByDescending(t => t.Priority).ThenByDescending(t => t.CreatedAt).AsQueryable();
             if (projectId.HasValue)
             {
                 todosQuery = todosQuery.Where(t => t.ProjectId == projectId.Value);
@@ -65,7 +66,7 @@ namespace TodoApp.Controllers
         // POST: Todos/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Title,Description,DueDate,ProjectId")] Todo todo)
+        public async Task<IActionResult> Create([Bind("Title,Description,DueDate,Priority,ProjectId")] Todo todo)
         {
             if (ModelState.IsValid)
             {
@@ -108,7 +109,7 @@ namespace TodoApp.Controllers
         // POST: Todos/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,IsDone,CreatedAt,DueDate,ProjectId")] Todo todo)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,IsDone,CreatedAt,DueDate,Priority,ProjectId")] Todo todo)
         {
             if (id != todo.Id)
             {
