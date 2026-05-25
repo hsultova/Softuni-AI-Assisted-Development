@@ -109,5 +109,23 @@ namespace TodoApp.Controllers
             }
             return RedirectToAction(nameof(Index));
         }
+        
+        // POST: Todos/ToggleComplete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleComplete(int id)
+        {
+            var todo = await _context.Todos.FindAsync(id);
+            if (todo == null)
+            {
+                return NotFound();
+            }
+
+            todo.IsDone = !todo.IsDone;
+            _context.Update(todo);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

@@ -36,6 +36,25 @@
                                 </span></div>
                             </div>
                             <div class="btn-group" role="group">
+                                <form asp-action="ToggleComplete" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@todo.Id" />
+                                    <button type="submit" class="btn btn-sm @(todo.IsDone ? "btn-outline-secondary" : "btn-outline-success")" aria-label="@(todo.IsDone ? "Undo" : "Mark Completed")" title="@(todo.IsDone ? "Undo" : "Mark Completed")">
+                                        @if (todo.IsDone)
+                                        {
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-counterclockwise" viewBox="0 0 16 16" aria-hidden="true">
+                                                <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                                                <path d="M8 1v4l3-2-3-2z"/>
+                                            </svg>
+                                        }
+                                        else
+                                        {
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16" aria-hidden="true">
+                                                <path d="M13.485 1.929a.75.75 0 0 1 1.06 1.06L6.53 10.006a.75.75 0 0 1-1.06 0L1.455 6.0a.75.75 0 1 1 1.06-1.06L6 8.425l7.485-6.496z"/>
+                                            </svg>
+                                        }
+                                    </button>
+                                </form>
                                 <a asp-action="Edit" asp-route-id="@todo.Id" class="btn btn-sm btn-outline-primary">Edit</a>
                                 <a asp-action="Delete" asp-route-id="@todo.Id" class="btn btn-sm btn-outline-danger">Delete</a>
                             </div>
