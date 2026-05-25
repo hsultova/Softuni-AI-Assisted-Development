@@ -23,10 +23,7 @@ namespace TodoApp.Migrations
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     DueDate = table.Column<DateTime>(type: "TEXT", nullable: true)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Todos", x => x.Id);
-                });
+                constraints: table => table.PrimaryKey("PK_Todos", x => x.Id));
         }
 
         /// <inheritdoc />

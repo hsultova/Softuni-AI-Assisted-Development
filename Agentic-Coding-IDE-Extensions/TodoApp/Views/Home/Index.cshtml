@@ -2,7 +2,38 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="text-center mb-5">
+    <h1 class="display-4">Welcome to TodoApp</h1>
+    <p class="lead">A simple, distraction-free task manager for your daily work, personal projects, and long-term goals.</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="card-title">Your Todos</h2>
+                <p class="card-text">Track your tasks in one place. Create new todos, update progress, and remove completed items from the list.</p>
+                <a asp-controller="Todos" asp-action="Index" class="btn btn-primary">Go to Todos</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card border-secondary mb-4">
+            <div class="card-body">
+                <h3>Productive by design</h3>
+                <p>TodoApp keeps the experience light and easy to use, without introducing complexity or unnecessary features.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-secondary mb-4">
+            <div class="card-body">
+                <h3>Local and simple</h3>
+                <p>No authentication is required. Your tasks are stored locally in SQLite, so you can focus on what matters.</p>
+            </div>
+        </div>
+    </div>
 </div>
