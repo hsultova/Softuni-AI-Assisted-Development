@@ -16,8 +16,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const isDone = todo.isDone;
         const due = todo.dueDate ? new Date(todo.dueDate).toLocaleDateString(undefined, { month: 'short', day: '2-digit', year: 'numeric' }) : '';
         const created = new Date(todo.createdAt).toLocaleDateString(undefined, { month: 'short', day: '2-digit', year: 'numeric' });
+        const projectName = todo.project?.name || '';
 
-                return `
+        return `
 <div class="col-md-6 mb-3">
     <div id="todo-card-${todo.id}" class="card ${isDone ? 'border-success' : ''}" data-isdone="${isDone}">
         <div class="card-body">
@@ -26,6 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="small text-secondary mb-3">
                 <div>Created: ${created}</div>
                 ${due ? `<div>Due: ${due}</div>` : ''}
+                ${projectName ? `<div>Project: <span class="badge bg-info text-dark">${escapeHtml(projectName)}</span></div>` : ''}
                 <div>Status: <span id="todo-status-${todo.id}" class="badge ${isDone ? 'bg-success' : 'bg-warning'}">${isDone ? 'Completed' : 'Pending'}</span></div>
             </div>
             <div class="btn-group" role="group">
@@ -53,13 +55,13 @@ document.addEventListener('DOMContentLoaded', function () {
             .replace(/'/g, '&#039;');
     }
 
-        function showToast(message, type = 'success', timeout = 5000) {
-                const container = document.getElementById('toasts-container');
-                if (!container) return;
+    function showToast(message, type = 'success', timeout = 5000) {
+        const container = document.getElementById('toasts-container');
+        if (!container) return;
 
-                const toastId = `toast-${Date.now()}`;
-                const bg = type === 'error' ? 'bg-danger text-white' : 'bg-success text-white';
-                const toastHtml = `
+        const toastId = `toast-${Date.now()}`;
+        const bg = type === 'error' ? 'bg-danger text-white' : 'bg-success text-white';
+        const toastHtml = `
 <div id="${toastId}" class="toast ${bg}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="${timeout}">
     <div class="d-flex">
         <div class="toast-body">${escapeHtml(message)}</div>
@@ -67,14 +69,12 @@ document.addEventListener('DOMContentLoaded', function () {
     </div>
 </div>`;
 
-                container.insertAdjacentHTML('beforeend', toastHtml);
-                const el = document.getElementById(toastId);
-                const bsToast = new bootstrap.Toast(el, { delay: timeout, autohide: true });
-                bsToast.show();
-                // remove after hidden to keep DOM clean
-                el.addEventListener('hidden.bs.toast', () => el.remove());
-        }
-
+        container.insertAdjacentHTML('beforeend', toastHtml);
+        const el = document.getElementById(toastId);
+        const bsToast = new bootstrap.Toast(el, { delay: timeout, autohide: true });
+        bsToast.show();
+        el.addEventListener('hidden.bs.toast', () => el.remove());
+    }
 
     async function bindToggleForms(root = document) {
         root.querySelectorAll('.toggle-complete-form').forEach(form => {
@@ -113,7 +113,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (status) { status.classList.remove('bg-success'); status.classList.add('bg-warning'); status.textContent = 'Pending'; }
                         if (btn) { btn.classList.remove('btn-outline-secondary'); btn.classList.add('btn-outline-success'); btn.innerHTML = checkSvg; btn.setAttribute('aria-label','Mark Completed'); btn.title = 'Mark Completed'; }
                     }
-                    // show short toast for status change
                     showToast(isDone ? 'Todo marked completed.' : 'Todo marked pending.');
                 }
                 catch (err) {
@@ -193,7 +192,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         const list = document.getElementById('todos-list');
                         const html = renderTodoCard(data.todo);
                         if (list) {
-                            // update or prepend
                             const existing = document.getElementById(`todo-card-${data.todo.id}`);
                             if (existing) {
                                 const col = existing.closest('.col-md-6');
@@ -201,39 +199,32 @@ document.addEventListener('DOMContentLoaded', function () {
                                 showToast('Todo updated.');
                             } else {
                                 list.insertAdjacentHTML('afterbegin', html);
-                                // hide empty message if present
                                 const empty = document.getElementById('empty-message');
                                 if (empty) empty.style.display = 'none';
                                 showToast('Todo created.');
                             }
 
-                            // re-bind handlers for new nodes
                             bindToggleForms(document);
                             bindDeleteButtons(document);
                         } else {
-                            // not on index page — redirect to index to see changes
                             window.location.href = '/Todos';
                         }
                     } else {
-                        // No todo payload, fallback to redirect
                         window.location.href = '/Todos';
                     }
                 }
                 catch (err) {
                     console.error(err);
-                    // fallback
                     form.submit();
                 }
             });
         });
     }
 
-    // initialize all handlers
     bindToggleForms(document);
     bindDeleteButtons(document);
     bindAjaxForms(document);
 
-    // show server-side TempData messages (rendered into the toasts container)
     const toastsContainer = document.getElementById('toasts-container');
     if (toastsContainer) {
         const s = toastsContainer.dataset.tempSuccess;

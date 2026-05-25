@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using TodoApp.Data;
 using TodoApp.Models;
 
@@ -8,23 +10,62 @@ namespace TodoApp.Controllers
     {
         private readonly AppDbContext _context = context;
 
-        // GET: Todos/Index
-        public async Task<IActionResult> Index()
+        private async Task PopulateProjectSelectListAsync(int? selectedProject = null)
         {
-            var todos = _context.Todos.OrderBy(t => t.CreatedAt).ToList();
+            var projects = await _context.Projects.OrderBy(p => p.Name).ToListAsync();
+            ViewData["Projects"] = new SelectList(projects, "Id", "Name", selectedProject);
+        }
+
+        private async Task<object> BuildTodoJsonAsync(Todo todo)
+        {
+            Project? project = todo.Project;
+            if (project == null && todo.ProjectId.HasValue)
+            {
+                project = await _context.Projects.FindAsync(todo.ProjectId.Value);
+            }
+
+            return new
+            {
+                success = true,
+                todo = new
+                {
+                    id = todo.Id,
+                    title = todo.Title,
+                    description = todo.Description,
+                    isDone = todo.IsDone,
+                    createdAt = todo.CreatedAt,
+                    dueDate = todo.DueDate,
+                    project = project is null ? null : new { id = project.Id, name = project.Name }
+                }
+            };
+        }
+
+        // GET: Todos/Index
+        public async Task<IActionResult> Index(int? projectId)
+        {
+            var todosQuery = _context.Todos.Include(t => t.Project).OrderBy(t => t.CreatedAt).AsQueryable();
+            if (projectId.HasValue)
+            {
+                todosQuery = todosQuery.Where(t => t.ProjectId == projectId.Value);
+            }
+
+            var todos = await todosQuery.ToListAsync();
+            await PopulateProjectSelectListAsync(projectId);
+            ViewData["SelectedProjectId"] = projectId;
             return View(todos);
         }
 
         // GET: Todos/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            await PopulateProjectSelectListAsync();
             return View();
         }
 
         // POST: Todos/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Title,Description,DueDate")] Todo todo)
+        public async Task<IActionResult> Create([Bind("Title,Description,DueDate,ProjectId")] Todo todo)
         {
             if (ModelState.IsValid)
             {
@@ -32,13 +73,17 @@ namespace TodoApp.Controllers
                 todo.IsDone = false;
                 _context.Add(todo);
                 await _context.SaveChangesAsync();
-                TempData["Success"] = "Todo created successfully.";
+
                 if (Request.Headers.TryGetValue("X-Requested-With", out var header) && header == "XMLHttpRequest")
                 {
-                    return Json(new { success = true, todo = new { id = todo.Id, title = todo.Title, description = todo.Description, isDone = todo.IsDone, createdAt = todo.CreatedAt, dueDate = todo.DueDate } });
+                    return Json(await BuildTodoJsonAsync(todo));
                 }
+
+                TempData["Success"] = "Todo created successfully.";
                 return RedirectToAction(nameof(Index));
             }
+
+            await PopulateProjectSelectListAsync(todo.ProjectId);
             return View(todo);
         }
 
@@ -55,13 +100,15 @@ namespace TodoApp.Controllers
             {
                 return NotFound();
             }
+
+            await PopulateProjectSelectListAsync(todo.ProjectId);
             return View(todo);
         }
 
         // POST: Todos/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,IsDone,CreatedAt,DueDate")] Todo todo)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,IsDone,CreatedAt,DueDate,ProjectId")] Todo todo)
         {
             if (id != todo.Id)
             {
@@ -79,13 +126,17 @@ namespace TodoApp.Controllers
                 {
                     ModelState.AddModelError("", "An error occurred while updating the todo.");
                 }
-                TempData["Success"] = "Todo updated successfully.";
+
                 if (Request.Headers.TryGetValue("X-Requested-With", out var header) && header == "XMLHttpRequest")
                 {
-                    return Json(new { success = true, todo = new { id = todo.Id, title = todo.Title, description = todo.Description, isDone = todo.IsDone, createdAt = todo.CreatedAt, dueDate = todo.DueDate } });
+                    return Json(await BuildTodoJsonAsync(todo));
                 }
+
+                TempData["Success"] = "Todo updated successfully.";
                 return RedirectToAction(nameof(Index));
             }
+
+            await PopulateProjectSelectListAsync(todo.ProjectId);
             return View(todo);
         }
 

@@ -12,6 +12,24 @@
 
     <form id="anti-forgery-form">@Html.AntiForgeryToken()</form>
 
+    <div class="row mb-4 align-items-end">
+        <div class="col-md-8">
+            <form method="get" asp-action="Index" class="row g-2 align-items-center">
+                <div class="col-auto">
+                    <label for="projectId" class="visually-hidden">Project</label>
+                    @Html.DropDownList("projectId", (SelectList)ViewData["Projects"], "All Projects", new { @class = "form-select", @id = "projectId" })
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-outline-secondary">Filter</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Show All</a>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-auto">
+            <a asp-controller="Projects" asp-action="Index" class="btn btn-primary">Manage Projects</a>
+        </div>
+    </div>
+
     @if (Model.Any())
     {
         <div id="todos-list" class="row">
@@ -32,6 +50,10 @@
                                 @if (todo.DueDate.HasValue)
                                 {
                                     <div>Due: @todo.DueDate.Value.ToString("MMM dd, yyyy")</div>
+                                }
+                                @if (todo.Project != null)
+                                {
+                                    <div>Project: <span class="badge bg-info text-dark">@todo.Project.Name</span></div>
                                 }
                                 <div>Status: <span id="todo-status-@todo.Id" class="badge @(todo.IsDone ? "bg-success" : "bg-warning")">
                                     @(todo.IsDone ? "Completed" : "Pending")

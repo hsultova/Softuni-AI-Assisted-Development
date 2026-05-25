@@ -31,6 +31,12 @@
                     <span asp-validation-for="DueDate" class="text-danger"></span>
                 </div>
 
+                <div class="mb-3">
+                    <label asp-for="ProjectId" class="form-label">Project</label>
+                    @Html.DropDownListFor(model => model.ProjectId, (SelectList)ViewBag.Projects, "No project", new { @class = "form-select" })
+                    <span asp-validation-for="ProjectId" class="text-danger"></span>
+                </div>
+
                 <div class="d-grid gap-2 d-sm-flex justify-content-sm-end">
                     <button type="submit" class="btn btn-primary">Create</button>
                     <a asp-action="Index" class="btn btn-secondary">Cancel</a>

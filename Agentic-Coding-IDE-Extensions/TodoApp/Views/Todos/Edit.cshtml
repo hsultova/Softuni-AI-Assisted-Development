@@ -34,6 +34,12 @@
                     <span asp-validation-for="DueDate" class="text-danger"></span>
                 </div>
 
+                <div class="mb-3">
+                    <label asp-for="ProjectId" class="form-label">Project</label>
+                    @Html.DropDownListFor(model => model.ProjectId, (SelectList)ViewBag.Projects, "No project", new { @class = "form-select" })
+                    <span asp-validation-for="ProjectId" class="text-danger"></span>
+                </div>
+
                 <div class="mb-3 form-check">
                     <input asp-for="IsDone" type="checkbox" class="form-check-input" />
                     <label asp-for="IsDone" class="form-check-label"></label>

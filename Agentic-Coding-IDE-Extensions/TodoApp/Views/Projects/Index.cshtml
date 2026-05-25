@@ -1,0 +1,40 @@
+@model IEnumerable<TodoApp.Models.Project>
+
+@{
+    ViewData["Title"] = "Projects";
+}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Projects</h1>
+        <a asp-action="Create" class="btn btn-primary">Add New Project</a>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="list-group">
+            @foreach (var project in Model)
+            {
+                <div class="list-group-item list-group-item-action mb-2">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="mb-1">@project.Name</h5>
+                            <p class="mb-1 text-muted">@project.Description</p>
+                            <small class="text-secondary">Created: @project.CreatedAt.ToString("MMM dd, yyyy")</small>
+                        </div>
+                        <div class="btn-group" role="group">
+                            <a asp-action="Edit" asp-route-id="@project.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <a asp-action="Delete" asp-route-id="@project.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info" role="alert">
+            No projects yet. <a asp-action="Create" class="alert-link">Create your first project</a>.
+        </div>
+    }
+</div>

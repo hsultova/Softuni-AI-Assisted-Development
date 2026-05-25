@@ -8,5 +8,8 @@ namespace TodoApp.Models
         public bool IsDone { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? DueDate { get; set; }
+
+        public int? ProjectId { get; set; }
+        public Project? Project { get; set; }
     }
 }
