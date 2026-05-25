@@ -32,6 +32,11 @@ namespace TodoApp.Controllers
                 todo.IsDone = false;
                 _context.Add(todo);
                 await _context.SaveChangesAsync();
+                TempData["Success"] = "Todo created successfully.";
+                if (Request.Headers.TryGetValue("X-Requested-With", out var header) && header == "XMLHttpRequest")
+                {
+                    return Json(new { success = true, todo = new { id = todo.Id, title = todo.Title, description = todo.Description, isDone = todo.IsDone, createdAt = todo.CreatedAt, dueDate = todo.DueDate } });
+                }
                 return RedirectToAction(nameof(Index));
             }
             return View(todo);
@@ -74,6 +79,11 @@ namespace TodoApp.Controllers
                 {
                     ModelState.AddModelError("", "An error occurred while updating the todo.");
                 }
+                TempData["Success"] = "Todo updated successfully.";
+                if (Request.Headers.TryGetValue("X-Requested-With", out var header) && header == "XMLHttpRequest")
+                {
+                    return Json(new { success = true, todo = new { id = todo.Id, title = todo.Title, description = todo.Description, isDone = todo.IsDone, createdAt = todo.CreatedAt, dueDate = todo.DueDate } });
+                }
                 return RedirectToAction(nameof(Index));
             }
             return View(todo);
@@ -107,6 +117,11 @@ namespace TodoApp.Controllers
                 _context.Todos.Remove(todo);
                 await _context.SaveChangesAsync();
             }
+            TempData["Success"] = "Todo deleted.";
+            if (Request.Headers.TryGetValue("X-Requested-With", out var header) && header == "XMLHttpRequest")
+            {
+                return Json(new { success = true, id });
+            }
             return RedirectToAction(nameof(Index));
         }
         
@@ -124,6 +139,13 @@ namespace TodoApp.Controllers
             todo.IsDone = !todo.IsDone;
             _context.Update(todo);
             await _context.SaveChangesAsync();
+
+            TempData["Success"] = todo.IsDone ? "Todo marked completed." : "Todo marked pending.";
+
+            if (Request.Headers.TryGetValue("X-Requested-With", out var header) && header == "XMLHttpRequest")
+            {
+                return Json(new { success = true, isDone = todo.IsDone });
+            }
 
             return RedirectToAction(nameof(Index));
         }

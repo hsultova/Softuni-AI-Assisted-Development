@@ -10,15 +10,17 @@
         <a asp-action="Create" class="btn btn-primary">Add New Todo</a>
     </div>
 
+    <form id="anti-forgery-form">@Html.AntiForgeryToken()</form>
+
     @if (Model.Any())
     {
-        <div class="row">
+        <div id="todos-list" class="row">
             @foreach (var todo in Model)
             {
                 <div class="col-md-6 mb-3">
-                    <div class="card @(todo.IsDone ? "border-success" : "")">
+                    <div id="todo-card-@todo.Id" class="card @(todo.IsDone ? "border-success" : "")" data-isdone="@(todo.IsDone.ToString().ToLower())">
                         <div class="card-body">
-                            <h5 class="card-title @(todo.IsDone ? "text-muted text-decoration-line-through" : "")">
+                            <h5 id="todo-title-@todo.Id" class="card-title @(todo.IsDone ? "text-muted text-decoration-line-through" : "")">
                                 @todo.Title
                             </h5>
                             @if (!string.IsNullOrEmpty(todo.Description))
@@ -31,12 +33,12 @@
                                 {
                                     <div>Due: @todo.DueDate.Value.ToString("MMM dd, yyyy")</div>
                                 }
-                                <div>Status: <span class="badge @(todo.IsDone ? "bg-success" : "bg-warning")">
+                                <div>Status: <span id="todo-status-@todo.Id" class="badge @(todo.IsDone ? "bg-success" : "bg-warning")">
                                     @(todo.IsDone ? "Completed" : "Pending")
                                 </span></div>
                             </div>
                             <div class="btn-group" role="group">
-                                <form asp-action="ToggleComplete" method="post" class="d-inline">
+                                <form asp-action="ToggleComplete" method="post" class="d-inline toggle-complete-form" data-id="@todo.Id">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="id" value="@todo.Id" />
                                     <button type="submit" class="btn btn-sm @(todo.IsDone ? "btn-outline-secondary" : "btn-outline-success")" aria-label="@(todo.IsDone ? "Undo" : "Mark Completed")" title="@(todo.IsDone ? "Undo" : "Mark Completed")">
@@ -56,7 +58,7 @@
                                     </button>
                                 </form>
                                 <a asp-action="Edit" asp-route-id="@todo.Id" class="btn btn-sm btn-outline-primary">Edit</a>
-                                <a asp-action="Delete" asp-route-id="@todo.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                                <button type="button" data-id="@todo.Id" class="btn btn-sm btn-outline-danger btn-delete-ajax">Delete</button>
                             </div>
                         </div>
                     </div>
@@ -66,7 +68,7 @@
     }
     else
     {
-        <div class="alert alert-info" role="alert">
+        <div id="empty-message" class="alert alert-info" role="alert">
             <p>No todos yet. <a asp-action="Create">Create your first todo!</a></p>
         </div>
     }

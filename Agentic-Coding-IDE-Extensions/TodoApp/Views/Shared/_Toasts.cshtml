@@ -1,0 +1,7 @@
+@{
+    var success = TempData["Success"] as string;
+    var error = TempData["Error"] as string;
+}
+<div id="toasts-container" class="position-fixed top-0 end-0 p-3" style="z-index:1080;" data-temp-success="@Html.Raw(success ?? "")" data-temp-error="@Html.Raw(error ?? "")">
+    <!-- Toasts will be inserted here by site.js -->
+</div>
