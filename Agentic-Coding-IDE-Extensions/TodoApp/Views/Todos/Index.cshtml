@@ -1,27 +1,44 @@
 @model IEnumerable<TodoApp.Models.Todo>
 
 @{
-    ViewData["Title"] = "My Todos";
+    var currentViewMode = ViewData["ViewMode"] as TodoApp.Models.ViewMode? ?? TodoApp.Models.ViewMode.All;
+    var selectedProjectId = ViewData["SelectedProjectId"] as int?;
 }
 
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>My Todos</h1>
+        <h1>@(ViewData["Title"] ?? "All Tasks")</h1>
         <a asp-action="Create" class="btn btn-primary">Add New Todo</a>
     </div>
 
     <form id="anti-forgery-form">@Html.AntiForgeryToken()</form>
 
+    <ul class="nav nav-tabs mb-3" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link @(currentViewMode == TodoApp.Models.ViewMode.All ? "active" : "")" href="@Url.Action("Index", new { projectId = selectedProjectId })">All Tasks</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link @(currentViewMode == TodoApp.Models.ViewMode.Today ? "active" : "")" href="@Url.Action("Index", new { projectId = selectedProjectId, viewMode = TodoApp.Models.ViewMode.Today })">Today</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link @(currentViewMode == TodoApp.Models.ViewMode.Upcoming ? "active" : "")" href="@Url.Action("Index", new { projectId = selectedProjectId, viewMode = TodoApp.Models.ViewMode.Upcoming })">Upcoming</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link @(currentViewMode == TodoApp.Models.ViewMode.Completed ? "active" : "")" href="@Url.Action("Index", new { projectId = selectedProjectId, viewMode = TodoApp.Models.ViewMode.Completed })">Completed</a>
+        </li>
+    </ul>
+
     <div class="row mb-4 align-items-end">
         <div class="col-md-8">
             <form method="get" asp-action="Index" class="row g-2 align-items-center">
+                <input type="hidden" name="viewMode" value="@currentViewMode" />
                 <div class="col-auto">
                     <label for="projectId" class="visually-hidden">Project</label>
-                    @Html.DropDownList("projectId", (SelectList)ViewData["Projects"], "All Projects", new { @class = "form-select", @id = "projectId" })
+                    @Html.DropDownList("projectId", ViewData["Projects"] as SelectList ?? new SelectList(Enumerable.Empty<object>()), "All Projects", new { @class = "form-select", @id = "projectId" })
                 </div>
                 <div class="col-auto">
                     <button type="submit" class="btn btn-outline-secondary">Filter</button>
-                    <a asp-action="Index" class="btn btn-outline-secondary">Show All</a>
+                    <a asp-action="Index" asp-route-viewMode="@currentViewMode" class="btn btn-outline-secondary">Clear Filter</a>
                 </div>
             </form>
         </div>
@@ -35,8 +52,8 @@
         <div id="todos-list" class="row">
             @foreach (var todo in Model)
             {
-                   <div class="col-md-6 mb-3">
-                       <div id="todo-card-@todo.Id" class="card @(todo.IsDone ? "border-success" : "") todo-card-@todo.Priority.ToString().ToLower()" data-isdone="@(todo.IsDone.ToString().ToLower())" data-priority="@((int)todo.Priority)">
+                <div class="col-md-6 mb-3">
+                    <div id="todo-card-@todo.Id" class="card @(todo.IsDone ? "border-success" : "") todo-card-@todo.Priority.ToString().ToLower()" data-isdone="@(todo.IsDone.ToString().ToLower())" data-priority="@((int)todo.Priority)">
                         <div class="card-body">
                             <h5 id="todo-title-@todo.Id" class="card-title @(todo.IsDone ? "text-muted text-decoration-line-through" : "")">
                                 @todo.Title
@@ -57,10 +74,10 @@
                                 }
                                 <div>Status: <span id="todo-status-@todo.Id" class="badge @(todo.IsDone ? "bg-success" : "bg-warning")">
                                     @(todo.IsDone ? "Completed" : "Pending")
-                                   </span></div>
-                                   <div>Priority: <span id="todo-priority-@todo.Id" class="badge @(todo.Priority == TodoApp.Models.Priority.High ? "bg-danger" : todo.Priority == TodoApp.Models.Priority.Medium ? "bg-warning" : "bg-secondary")">
-                                       @todo.Priority
-                                   </span></div>
+                                </span></div>
+                                <div>Priority: <span id="todo-priority-@todo.Id" class="badge @(todo.Priority == TodoApp.Models.Priority.High ? "bg-danger" : todo.Priority == TodoApp.Models.Priority.Medium ? "bg-warning" : "bg-secondary")">
+                                    @todo.Priority
+                                </span></div>
                             </div>
                             <div class="btn-group" role="group">
                                 <form asp-action="ToggleComplete" method="post" class="d-inline toggle-complete-form" data-id="@todo.Id">
@@ -94,7 +111,7 @@
     else
     {
         <div id="empty-message" class="alert alert-info" role="alert">
-            <p>No todos yet. <a asp-action="Create">Create your first todo!</a></p>
+            <p>No tasks found. <a asp-action="Create">Create your first todo!</a></p>
         </div>
     }
 </div>

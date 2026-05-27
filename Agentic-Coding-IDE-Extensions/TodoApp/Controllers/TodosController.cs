@@ -42,19 +42,44 @@ namespace TodoApp.Controllers
         }
 
         // GET: Todos/Index
-        public async Task<IActionResult> Index(int? projectId)
+        public async Task<IActionResult> Index(int? projectId, ViewMode? viewMode = null)
         {
-            var todosQuery = _context.Todos.Include(t => t.Project).OrderByDescending(t => t.Priority).ThenByDescending(t => t.CreatedAt).AsQueryable();
+            var today = DateTime.Today;
+            var todosQuery = _context.Todos.Include(t => t.Project).OrderByDescending(t => t.Priority).ThenBy(t => t.DueDate).ThenByDescending(t => t.CreatedAt).AsQueryable();
+            
             if (projectId.HasValue)
             {
                 todosQuery = todosQuery.Where(t => t.ProjectId == projectId.Value);
             }
 
+            switch (viewMode)
+            {
+                case ViewMode.Today:
+                    todosQuery = todosQuery.Where(t => !t.IsDone && (t.DueDate.HasValue ? t.DueDate.Value.Date <= today : true));
+                    break;
+                case ViewMode.Upcoming:
+                    todosQuery = todosQuery.Where(t => !t.IsDone && t.DueDate.HasValue && t.DueDate.Value.Date > today);
+                    break;
+                case ViewMode.Completed:
+                    todosQuery = todosQuery.Where(t => t.IsDone);
+                    break;
+            }
+
             var todos = await todosQuery.ToListAsync();
             await PopulateProjectSelectListAsync(projectId);
             ViewData["SelectedProjectId"] = projectId;
+            ViewData["ViewMode"] = viewMode;
+            ViewData["Title"] = GetViewModeTitle(viewMode);
             return View(todos);
         }
+
+        private static string GetViewModeTitle(ViewMode? viewMode) => viewMode switch
+        {
+            ViewMode.Today => "Today's Tasks",
+            ViewMode.Upcoming => "Upcoming Tasks",
+            ViewMode.Completed => "Completed Tasks",
+            _ => "All Tasks"
+        };
 
         // GET: Todos/Create
         public async Task<IActionResult> Create()
@@ -103,6 +128,7 @@ namespace TodoApp.Controllers
             }
 
             await PopulateProjectSelectListAsync(todo.ProjectId);
+            ViewBag.Projects = ViewData["Projects"];
             return View(todo);
         }
 
@@ -138,6 +164,7 @@ namespace TodoApp.Controllers
             }
 
             await PopulateProjectSelectListAsync(todo.ProjectId);
+            ViewBag.Projects = ViewData["Projects"];
             return View(todo);
         }
 
