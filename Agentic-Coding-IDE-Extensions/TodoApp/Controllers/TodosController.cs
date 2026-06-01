@@ -81,8 +81,8 @@ namespace TodoApp.Controllers
 
             todosQuery = sortBy switch
             {
-                SortField.DueDate => descending 
-                    ? todosQuery.OrderByDescending(t => t.DueDate.HasValue ? 0 : 1).ThenByDescending(t => t.DueDate) 
+                SortField.DueDate => descending
+                    ? todosQuery.OrderBy(t => t.DueDate.HasValue ? 0 : 1).ThenByDescending(t => t.DueDate)
                     : todosQuery.OrderBy(t => t.DueDate.HasValue ? 0 : 1).ThenBy(t => t.DueDate),
                 SortField.Priority => descending 
                     ? todosQuery.OrderByDescending(t => t.Priority).ThenByDescending(t => t.CreatedAt) 

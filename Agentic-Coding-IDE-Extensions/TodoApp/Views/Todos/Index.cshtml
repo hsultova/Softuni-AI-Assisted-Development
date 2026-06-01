@@ -37,16 +37,16 @@
 
     <ul class="nav nav-tabs mb-3" role="tablist">
         <li class="nav-item" role="presentation">
-            <a class="nav-link @(currentViewMode == TodoApp.Models.ViewMode.All ? "active" : "")" href="@Url.Action("Index", new { projectId = selectedProjectId })">All Tasks</a>
+            <a class="nav-link @(currentViewMode == TodoApp.Models.ViewMode.All ? "active" : "")" href="@Url.Action("Index", new { projectId = selectedProjectId, statusFilter, priorityFilter, sortBy = currentSortField, sortDirection = currentSortDir })">All Tasks</a>
         </li>
         <li class="nav-item" role="presentation">
-            <a class="nav-link @(currentViewMode == TodoApp.Models.ViewMode.Today ? "active" : "")" href="@Url.Action("Index", new { projectId = selectedProjectId, viewMode = TodoApp.Models.ViewMode.Today })">Today</a>
+            <a class="nav-link @(currentViewMode == TodoApp.Models.ViewMode.Today ? "active" : "")" href="@Url.Action("Index", new { projectId = selectedProjectId, viewMode = TodoApp.Models.ViewMode.Today, statusFilter, priorityFilter, sortBy = currentSortField, sortDirection = currentSortDir })">Today</a>
         </li>
         <li class="nav-item" role="presentation">
-            <a class="nav-link @(currentViewMode == TodoApp.Models.ViewMode.Upcoming ? "active" : "")" href="@Url.Action("Index", new { projectId = selectedProjectId, viewMode = TodoApp.Models.ViewMode.Upcoming })">Upcoming</a>
+            <a class="nav-link @(currentViewMode == TodoApp.Models.ViewMode.Upcoming ? "active" : "")" href="@Url.Action("Index", new { projectId = selectedProjectId, viewMode = TodoApp.Models.ViewMode.Upcoming, statusFilter, priorityFilter, sortBy = currentSortField, sortDirection = currentSortDir })">Upcoming</a>
         </li>
         <li class="nav-item" role="presentation">
-            <a class="nav-link @(currentViewMode == TodoApp.Models.ViewMode.Completed ? "active" : "")" href="@Url.Action("Index", new { projectId = selectedProjectId, viewMode = TodoApp.Models.ViewMode.Completed })">Completed</a>
+            <a class="nav-link @(currentViewMode == TodoApp.Models.ViewMode.Completed ? "active" : "")" href="@Url.Action("Index", new { projectId = selectedProjectId, viewMode = TodoApp.Models.ViewMode.Completed, statusFilter, priorityFilter, sortBy = currentSortField, sortDirection = currentSortDir })">Completed</a>
         </li>
     </ul>
 
