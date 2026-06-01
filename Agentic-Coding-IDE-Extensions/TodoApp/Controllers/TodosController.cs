@@ -42,14 +42,26 @@ namespace TodoApp.Controllers
         }
 
         // GET: Todos/Index
-        public async Task<IActionResult> Index(int? projectId, ViewMode? viewMode = null)
+        public async Task<IActionResult> Index(int? projectId, ViewMode? viewMode = null, StatusFilter? statusFilter = null, PriorityFilter? priorityFilter = null, SortField? sortBy = null, SortDirection? sortDirection = null)
         {
             var today = DateTime.Today;
-            var todosQuery = _context.Todos.Include(t => t.Project).OrderByDescending(t => t.Priority).ThenBy(t => t.DueDate).ThenByDescending(t => t.CreatedAt).AsQueryable();
-            
+            var todosQuery = _context.Todos.Include(t => t.Project).AsQueryable();
+
             if (projectId.HasValue)
             {
                 todosQuery = todosQuery.Where(t => t.ProjectId == projectId.Value);
+            }
+
+            if (statusFilter.HasValue && statusFilter != StatusFilter.All)
+            {
+                bool isDoneFilter = statusFilter == StatusFilter.Completed;
+                todosQuery = todosQuery.Where(t => t.IsDone == isDoneFilter);
+            }
+
+            if (priorityFilter.HasValue && priorityFilter != PriorityFilter.All)
+            {
+                var priorityValue = (Priority)priorityFilter.Value;
+                todosQuery = todosQuery.Where(t => t.Priority == priorityValue);
             }
 
             switch (viewMode)
@@ -65,10 +77,32 @@ namespace TodoApp.Controllers
                     break;
             }
 
+            bool descending = !sortDirection.HasValue || sortDirection == SortDirection.Descending;
+
+            todosQuery = sortBy switch
+            {
+                SortField.DueDate => descending 
+                    ? todosQuery.OrderByDescending(t => t.DueDate.HasValue ? 0 : 1).ThenByDescending(t => t.DueDate) 
+                    : todosQuery.OrderBy(t => t.DueDate.HasValue ? 0 : 1).ThenBy(t => t.DueDate),
+                SortField.Priority => descending 
+                    ? todosQuery.OrderByDescending(t => t.Priority).ThenByDescending(t => t.CreatedAt) 
+                    : todosQuery.OrderBy(t => t.Priority).ThenBy(t => t.CreatedAt),
+                SortField.CreatedAt => descending 
+                    ? todosQuery.OrderByDescending(t => t.CreatedAt) 
+                    : todosQuery.OrderBy(t => t.CreatedAt),
+                _ => descending 
+                    ? todosQuery.OrderByDescending(t => t.Priority).ThenBy(t => t.DueDate).ThenByDescending(t => t.CreatedAt) 
+                    : todosQuery.OrderBy(t => t.Priority).ThenBy(t => t.DueDate).ThenBy(t => t.CreatedAt)
+            };
+
             var todos = await todosQuery.ToListAsync();
             await PopulateProjectSelectListAsync(projectId);
             ViewData["SelectedProjectId"] = projectId;
             ViewData["ViewMode"] = viewMode;
+            ViewData["StatusFilter"] = statusFilter;
+            ViewData["PriorityFilter"] = priorityFilter;
+            ViewData["SortBy"] = sortBy;
+            ViewData["SortDirection"] = sortDirection;
             ViewData["Title"] = GetViewModeTitle(viewMode);
             return View(todos);
         }

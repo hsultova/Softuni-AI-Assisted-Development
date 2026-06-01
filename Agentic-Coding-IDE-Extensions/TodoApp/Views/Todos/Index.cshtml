@@ -3,6 +3,28 @@
 @{
     var currentViewMode = ViewData["ViewMode"] as TodoApp.Models.ViewMode? ?? TodoApp.Models.ViewMode.All;
     var selectedProjectId = ViewData["SelectedProjectId"] as int?;
+    var statusFilter = ViewData["StatusFilter"] as TodoApp.Models.StatusFilter? ?? TodoApp.Models.StatusFilter.All;
+    var priorityFilter = ViewData["PriorityFilter"] as TodoApp.Models.PriorityFilter? ?? TodoApp.Models.PriorityFilter.All;
+    var sortBy = ViewData["SortBy"] as TodoApp.Models.SortField?;
+    var sortDirection = ViewData["SortDirection"] as TodoApp.Models.SortDirection? ?? TodoApp.Models.SortDirection.Descending;
+    var currentSortField = sortBy?.ToString() ?? "";
+    var currentSortDir = sortDirection == TodoApp.Models.SortDirection.Ascending ? "asc" : "desc";
+    var dueDateSortDir = sortBy == TodoApp.Models.SortField.DueDate && sortDirection == TodoApp.Models.SortDirection.Ascending ? "desc" : "asc";
+    var prioritySortDir = sortBy == TodoApp.Models.SortField.Priority && sortDirection == TodoApp.Models.SortDirection.Ascending ? "desc" : "asc";
+    var createdAtSortDir = sortBy == TodoApp.Models.SortField.CreatedAt && sortDirection == TodoApp.Models.SortDirection.Ascending ? "desc" : "asc";
+    var statusSelectList = new List<SelectListItem>
+    {
+        new SelectListItem { Text = "All Statuses", Value = "All", Selected = statusFilter == TodoApp.Models.StatusFilter.All },
+        new SelectListItem { Text = "Pending", Value = "Pending", Selected = statusFilter == TodoApp.Models.StatusFilter.Pending },
+        new SelectListItem { Text = "Completed", Value = "Completed", Selected = statusFilter == TodoApp.Models.StatusFilter.Completed }
+    };
+    var prioritySelectList = new List<SelectListItem>
+    {
+        new SelectListItem { Text = "All Priorities", Value = "All", Selected = priorityFilter == TodoApp.Models.PriorityFilter.All },
+        new SelectListItem { Text = "Low", Value = "Low", Selected = priorityFilter == TodoApp.Models.PriorityFilter.Low },
+        new SelectListItem { Text = "Medium", Value = "Medium", Selected = priorityFilter == TodoApp.Models.PriorityFilter.Medium },
+        new SelectListItem { Text = "High", Value = "High", Selected = priorityFilter == TodoApp.Models.PriorityFilter.High }
+    };
 }
 
 <div class="container mt-5">
@@ -37,13 +59,51 @@
                     @Html.DropDownList("projectId", ViewData["Projects"] as SelectList ?? new SelectList(Enumerable.Empty<object>()), "All Projects", new { @class = "form-select", @id = "projectId" })
                 </div>
                 <div class="col-auto">
-                    <button type="submit" class="btn btn-outline-secondary">Filter</button>
-                    <a asp-action="Index" asp-route-viewMode="@currentViewMode" class="btn btn-outline-secondary">Clear Filter</a>
+                    <label for="statusFilter" class="visually-hidden">Status</label>
+                    @Html.DropDownList("statusFilter", statusSelectList, new { @class = "form-select", @id = "statusFilter" })
+                </div>
+                <div class="col-auto">
+                    <label for="priorityFilter" class="visually-hidden">Priority</label>
+                    @Html.DropDownList("priorityFilter", prioritySelectList, new { @class = "form-select", @id = "priorityFilter" })
+                </div>
+                <input type="hidden" name="sortBy" value="@currentSortField" />
+                <input type="hidden" name="sortDirection" value="@currentSortDir" />
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-outline-secondary">Apply Filters</button>
+                    <a asp-action="Index" asp-route-viewMode="@currentViewMode" class="btn btn-outline-secondary">Clear All</a>
                 </div>
             </form>
         </div>
         <div class="col-md-auto">
             <a asp-controller="Projects" asp-action="Index" class="btn btn-primary">Manage Projects</a>
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <div class="col">
+            <div class="btn-group" role="group">
+                <a asp-action="Index" asp-route-projectId="@selectedProjectId" asp-route-viewMode="@currentViewMode" asp-route-statusFilter="@statusFilter" asp-route-priorityFilter="@priorityFilter" asp-route-sortBy="DueDate" asp-route-sortDirection="@dueDateSortDir" class="btn btn-sm btn-outline-secondary @(sortBy == TodoApp.Models.SortField.DueDate ? "active" : "")">
+                    Due Date
+                    @if (sortBy == TodoApp.Models.SortField.DueDate)
+                    {
+                        <span>@(sortDirection == TodoApp.Models.SortDirection.Ascending ? "▲" : "▼")</span>
+                    }
+                </a>
+                <a asp-action="Index" asp-route-projectId="@selectedProjectId" asp-route-viewMode="@currentViewMode" asp-route-statusFilter="@statusFilter" asp-route-priorityFilter="@priorityFilter" asp-route-sortBy="Priority" asp-route-sortDirection="@prioritySortDir" class="btn btn-sm btn-outline-secondary @(sortBy == TodoApp.Models.SortField.Priority ? "active" : "")">
+                    Priority
+                    @if (sortBy == TodoApp.Models.SortField.Priority)
+                    {
+                        <span>@(sortDirection == TodoApp.Models.SortDirection.Ascending ? "▲" : "▼")</span>
+                    }
+                </a>
+                <a asp-action="Index" asp-route-projectId="@selectedProjectId" asp-route-viewMode="@currentViewMode" asp-route-statusFilter="@statusFilter" asp-route-priorityFilter="@priorityFilter" asp-route-sortBy="CreatedAt" asp-route-sortDirection="@createdAtSortDir" class="btn btn-sm btn-outline-secondary @(sortBy == TodoApp.Models.SortField.CreatedAt ? "active" : "")">
+                    Created
+                    @if (sortBy == TodoApp.Models.SortField.CreatedAt)
+                    {
+                        <span>@(sortDirection == TodoApp.Models.SortDirection.Ascending ? "▲" : "▼")</span>
+                    }
+                </a>
+            </div>
         </div>
     </div>
 
