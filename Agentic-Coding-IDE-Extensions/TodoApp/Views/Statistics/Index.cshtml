@@ -1,0 +1,137 @@
+@model TodoApp.Models.StatisticsViewModel
+
+@{
+    ViewData["Title"] = "Statistics";
+}
+
+<h2 class="mb-4">Productivity Statistics</h2>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="card-title text-muted mb-1">Total Tasks</h6>
+                <p class="display-5 mb-0">@Model.TotalTodos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="card text-center border-success">
+            <div class="card-body">
+                <h6 class="card-title text-muted mb-1">Completed</h6>
+                <p class="display-5 mb-0 text-success">@Model.TotalCompleted</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="card-title text-muted mb-1">Overall Rate</h6>
+                <p class="display-5 mb-0">@Model.OverallCompletionRate.ToString("0.#")%</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header fw-semibold">Completed Tasks &mdash; Last 7 Days</div>
+            <div class="card-body">
+                <canvas id="dailyChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header fw-semibold">Completed Tasks &mdash; Last 4 Weeks</div>
+            <div class="card-body">
+                <canvas id="weeklyChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header fw-semibold">Completion Rate by Project</div>
+    <div class="card-body">
+        @if (!Model.ProjectStats.Any())
+        {
+            <p class="text-muted mb-0">No projects or tasks found.</p>
+        }
+        else
+        {
+            <table class="table table-borderless align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:25%">Project</th>
+                        <th>Progress</th>
+                        <th style="width:110px" class="text-end">Done / Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var stat in Model.ProjectStats)
+                    {
+                        <tr>
+                            <td>@stat.ProjectName</td>
+                            <td>
+                                <div class="progress" style="height:20px">
+                                    <div class="progress-bar bg-success" role="progressbar"
+                                         style="width:@stat.CompletionRate.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture)%"
+                                         aria-valuenow="@stat.CompletionRate"
+                                         aria-valuemin="0" aria-valuemax="100">
+                                        @if (stat.CompletionRate >= 15)
+                                        {
+                                            <span class="small">@stat.CompletionRate.ToString("0.#")%</span>
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-end text-muted small">@stat.Completed / @stat.Total</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        const barDefaults = {
+            type: 'bar',
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } } }
+            }
+        };
+
+        new Chart(document.getElementById('dailyChart'), {
+            ...barDefaults,
+            data: {
+                labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                    Model.Last7DayStats.Select(d => d.Date.ToString("MMM d")))),
+                datasets: [{
+                    data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                        Model.Last7DayStats.Select(d => d.Count))),
+                    backgroundColor: '#198754'
+                }]
+            }
+        });
+
+        new Chart(document.getElementById('weeklyChart'), {
+            ...barDefaults,
+            data: {
+                labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                    Model.Last4WeeksStats.Select(w => w.WeekLabel))),
+                datasets: [{
+                    data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                        Model.Last4WeeksStats.Select(w => w.Count))),
+                    backgroundColor: '#0d6efd'
+                }]
+            }
+        });
+    </script>
+}
